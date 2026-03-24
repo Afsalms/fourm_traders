@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four M Traders – Import & Export</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1a0f; --navy-mid:#112218; --navy-light:#1a3a22;
+  --gold:#c9a84c; --gold-light:#e8c97a; --gold-pale:#f5e6c0;
+  --cream:#f5f0e8; --white:#ffffff; --muted:#7a9a82;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--cream);font-family:'Montserrat',sans-serif;overflow-x:hidden}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:linear-gradient(to bottom,rgba(10,22,40,.97) 0%,transparent 100%);backdrop-filter:blur(4px);border-bottom:1px solid rgba(201,168,76,.1)}
+.nav-logo{display:flex;align-items:center;gap:.8rem;text-decoration:none}
+.nav-logo img{height:44px;width:44px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(201,168,76,.3))}
+.nav-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;letter-spacing:.15em;color:var(--gold);line-height:1}
+.nav-logo-text span{display:block;font-size:.55rem;letter-spacing:.3em;color:var(--muted);font-family:'Montserrat',sans-serif;font-weight:400;text-transform:uppercase;margin-top:2px}
+nav ul{display:flex;gap:2.2rem;list-style:none}
+nav ul a{color:var(--muted);text-decoration:none;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;font-weight:500;transition:color .3s}
+nav ul a:hover{color:var(--gold)}
+
+/* HERO */
+#hero{min-height:100vh;position:relative;display:flex;align-items:center;padding:0 4rem;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 40%,rgba(201,168,76,.07) 0%,transparent 60%),linear-gradient(135deg,#0a1a0f 0%,#0d2014 50%,#091509 100%)}
+.hero-ring{position:absolute;border:1px solid rgba(201,168,76,.07);border-radius:50%}
+.hero-ring:nth-child(1){width:700px;height:700px;top:50%;left:62%;transform:translate(-50%,-50%)}
+.hero-ring:nth-child(2){width:1050px;height:1050px;top:50%;left:62%;transform:translate(-50%,-50%)}
+.hero-ring:nth-child(3){width:1400px;height:1400px;top:50%;left:62%;transform:translate(-50%,-50%)}
+.hero-content{position:relative;z-index:2;max-width:650px}
+.hero-eyebrow{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;animation:fadeUp .8s ease forwards;opacity:0}
+.hero-eyebrow-line{width:40px;height:1px;background:var(--gold)}
+.hero-eyebrow span{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,7vw,6rem);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:.3rem;animation:fadeUp .8s .15s ease forwards;opacity:0}
+.hero-title em{font-style:italic;color:var(--gold)}
+.hero-subtitle{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,2vw,1.4rem);font-weight:300;font-style:italic;color:var(--muted);margin-bottom:2.5rem;animation:fadeUp .8s .3s ease forwards;opacity:0}
+.hero-desc{font-size:.82rem;line-height:1.9;color:var(--muted);max-width:460px;margin-bottom:3rem;font-weight:300;animation:fadeUp .8s .45s ease forwards;opacity:0}
+.hero-cta{display:flex;gap:1.5rem;align-items:center;animation:fadeUp .8s .6s ease forwards;opacity:0}
+.btn-primary{display:inline-flex;align-items:center;gap:.6rem;background:var(--gold);color:var(--navy);padding:.85rem 2rem;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;text-decoration:none;font-family:'Montserrat',sans-serif;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 10px 40px rgba(201,168,76,.3)}
+.btn-secondary{display:inline-flex;align-items:center;gap:.5rem;color:var(--gold);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:2px;transition:all .3s}
+.btn-secondary:hover{border-color:var(--gold)}
+
+/* HERO LOGO EMBLEM */
+.hero-emblem{position:absolute;right:5rem;top:50%;transform:translateY(-50%);z-index:2;animation:fadeUp .8s .7s ease forwards;opacity:0;display:flex;flex-direction:column;align-items:center}
+.hero-emblem img{
+  width:320px;height:320px;object-fit:contain;
+  mix-blend-mode:normal;
+  filter:drop-shadow(0 0 50px rgba(201,168,76,.4)) drop-shadow(0 0 20px rgba(201,168,76,.2));
+}
+.hero-emblem::before{
+  content:'';
+  position:absolute;
+  width:360px;height:360px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(201,168,76,.12) 0%, rgba(26,58,34,.2) 40%, transparent 70%);
+  animation: emblemPulse 4s ease-in-out infinite;
+}
+.hero-emblem::after{
+  content:'';
+  position:absolute;
+  width:400px;height:400px;
+  border-radius:50%;
+  border:1px solid rgba(201,168,76,.18);
+  animation: emblemPulse 4s ease-in-out infinite reverse;
+}
+@keyframes emblemPulse{
+  0%,100%{transform:scale(1);opacity:.6}
+  50%{transform:scale(1.05);opacity:1}
+}
+
+/* HERO STATS */
+.hero-stats-bar{position:absolute;bottom:3rem;left:4rem;right:4rem;display:flex;gap:0;z-index:2;animation:fadeUp .8s .9s ease forwards;opacity:0}
+.stat-pill{flex:1;display:flex;flex-direction:column;align-items:center;padding:1.2rem;border:1px solid rgba(201,168,76,.12);border-right:none;background:rgba(10,22,40,.6);backdrop-filter:blur(8px)}
+.stat-pill:last-child{border-right:1px solid rgba(201,168,76,.12)}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--gold);line-height:1}
+.stat-lbl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.3rem}
+
+/* HERO CREDENTIALS */
+.hero-credentials{
+  display:flex;align-items:stretch;gap:0;
+  margin-top:2.5rem;
+  border:1px solid rgba(201,168,76,.2);
+  background:rgba(10,26,15,.6);
+  backdrop-filter:blur(12px);
+  max-width:560px;
+  animation:fadeUp .8s .75s ease forwards;
+  opacity:0;
+}
+.hero-cred-item{
+  display:flex;align-items:center;gap:.9rem;
+  padding:.9rem 1.4rem;
+  flex:1;
+  transition:background .3s;
+  min-width:0;
+}
+.hero-cred-item:hover{background:rgba(201,168,76,.06)}
+.hero-cred-icon{
+  width:32px;height:32px;flex-shrink:0;
+  border:1px solid rgba(201,168,76,.3);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold);
+}
+.hero-cred-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.hero-cred-label{
+  font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;white-space:nowrap;
+}
+.hero-cred-value{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.95rem;color:var(--cream);
+  letter-spacing:.05em;line-height:1;white-space:nowrap;
+}
+.hero-cred-badge{
+  font-size:.48rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);background:rgba(201,168,76,.1);
+  border:1px solid rgba(201,168,76,.25);
+  padding:.22rem .5rem;white-space:nowrap;flex-shrink:0;
+}
+.hero-cred-divider{
+  width:1px;
+  background:rgba(201,168,76,.15);
+  flex-shrink:0;
+  align-self:stretch;
+}
+.scroll-ind{position:absolute;bottom:7rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;animation:fadeUp 1s 1.2s ease forwards;opacity:0}
+.scroll-ind span{font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollPulse 2s infinite}
+
+/* SECTION BASE */
+section{padding:6rem 4rem}
+.sec-label{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem}
+.sec-label-line{width:30px;height:1px;background:var(--gold)}
+.sec-label span{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:300;color:var(--white);line-height:1.15;margin-bottom:1.2rem}
+.sec-title em{font-style:italic;color:var(--gold)}
+
+/* ABOUT */
+#about{background:var(--navy-mid);position:relative;overflow:hidden}
+#about::before{content:'FOUR M';position:absolute;font-family:'Cormorant Garamond',serif;font-size:18rem;font-weight:700;color:rgba(201,168,76,.025);top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;position:relative;z-index:1}
+.about-text p{font-size:.85rem;line-height:1.9;color:var(--muted);font-weight:300;margin-bottom:1.2rem}
+.cred-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:2.5rem}
+.cred-card{border:1px solid rgba(201,168,76,.18);padding:1.3rem;background:rgba(201,168,76,.03);transition:all .3s;cursor:default}
+.cred-card:hover{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.07);transform:translateY(-2px)}
+.cred-lbl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem}
+.cred-val{font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--cream)}
+.logo-box{background:transparent;border:none;padding:3.5rem;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.logo-box::before{content:'';position:absolute;inset:12px;border:none;pointer-events:none}
+.logo-box img{width:100%;max-width:320px;mix-blend-mode:normal;filter:drop-shadow(0 0 30px rgba(201,168,76,.25))}
+.reg-strip{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:1.2rem;border:1px solid rgba(201,168,76,.12);background:rgba(201,168,76,.04)}
+.reg-item{padding:1rem;text-align:center;border-right:1px solid rgba(201,168,76,.1)}
+.reg-item:last-child{border-right:none}
+.reg-lbl{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.3rem}
+.reg-val{font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--gold)}
+
+/* SUBSIDIARIES */
+#subsidiaries{background:var(--navy)}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3.5rem}
+.sub-card{border:1px solid rgba(201,168,76,.12);padding:2.8rem;position:relative;overflow:hidden;transition:all .4s;background:linear-gradient(135deg,rgba(17,34,24,.8),rgba(10,26,15,.8));cursor:default}
+.sub-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 40px rgba(201,168,76,.07)}
+.sub-num{font-family:'Cormorant Garamond',serif;font-size:6rem;font-weight:300;color:rgba(201,168,76,.07);position:absolute;top:.5rem;right:1.5rem;line-height:1}
+.sub-since{font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.sub-since::before{content:'';width:18px;height:1px;background:var(--gold)}
+.sub-name{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300;color:var(--white);margin-bottom:.6rem}
+.sub-div{width:36px;height:1px;background:var(--gold);margin:1.2rem 0}
+.sub-desc{font-size:.8rem;color:var(--muted);font-weight:300;line-height:1.75}
+
+/* ════════════════════════════════════
+   PRODUCTS — CAROUSEL SECTION
+════════════════════════════════════ */
+#products{background:var(--navy-mid);padding-bottom:5rem}
+.products-header{display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:end;margin-bottom:4rem}
+.products-header p{font-size:.82rem;line-height:1.9;color:var(--muted);font-weight:300}
+
+/* Product Tabs */
+.product-tabs{display:flex;gap:0;border-bottom:1px solid rgba(201,168,76,.15);margin-bottom:3rem;flex-wrap:wrap}
+.prod-tab{padding:.8rem 1.8rem;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .3s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Montserrat',sans-serif}
+.prod-tab:hover{color:var(--cream)}
+.prod-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* Product Panel */
+.product-panel{display:none}
+.product-panel.active{display:grid;grid-template-columns:1.3fr 1fr;gap:3.5rem;align-items:start}
+
+/* Carousel */
+.carousel-wrap{position:relative;overflow:hidden;border:1px solid rgba(201,168,76,.15)}
+.carousel-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.carousel-slide{min-width:100%;position:relative;overflow:hidden}
+.carousel-img{width:100%;height:380px;object-fit:cover;display:block}
+
+/* Real image slides */
+.wood-slide{width:100%;height:380px;position:relative;overflow:hidden}
+.wood-slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 6s ease}
+.wood-slide:hover img{transform:scale(1.04)}
+
+/* Slide label */
+.slide-badge{position:absolute;bottom:0;left:0;right:0;padding:.8rem 1.2rem;background:linear-gradient(to top,rgba(10,22,40,.92),transparent);display:flex;flex-direction:column}
+.slide-variant{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--white);font-weight:400}
+.slide-spec{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:.2rem}
+
+/* Carousel controls */
+.carousel-controls{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;background:rgba(10,22,40,.8);border:1px solid rgba(201,168,76,.1);border-top:none}
+.carousel-arrows{display:flex;gap:.5rem}
+.car-btn{width:32px;height:32px;border:1px solid rgba(201,168,76,.25);background:none;color:var(--gold);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .3s;font-family:'Montserrat',sans-serif}
+.car-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
+.carousel-dots{display:flex;gap:.4rem}
+.car-dot{width:6px;height:6px;border-radius:50%;background:rgba(201,168,76,.25);cursor:pointer;transition:all .3s}
+.car-dot.active{background:var(--gold);width:18px;border-radius:3px}
+
+/* Product info side */
+.prod-info .prod-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--white);margin-bottom:.5rem}
+.prod-info .prod-subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--gold);margin-bottom:1.5rem}
+.prod-info .prod-divider{width:40px;height:1px;background:var(--gold);margin-bottom:1.5rem}
+.prod-info .prod-desc{font-size:.82rem;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:2rem}
+
+.variants-title{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.variant-list{display:flex;flex-direction:column;gap:.6rem}
+.variant-item{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border:1px solid rgba(201,168,76,.1);background:rgba(201,168,76,.03);cursor:pointer;transition:all .3s}
+.variant-item:hover,.variant-item.active{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.08)}
+.variant-swatch{width:28px;height:28px;border-radius:3px;flex-shrink:0}
+.variant-name{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream)}
+.variant-spec{font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin-left:auto}
+
+/* OWNERS */
+#owners{background:var(--navy)}
+.owners-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.8rem;margin-top:3.5rem}
+.owner-card{border:1px solid rgba(201,168,76,.1);padding:0;position:relative;transition:all .4s;background:rgba(255,255,255,.01);overflow:hidden}
+.owner-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.owner-card-body{padding:1.5rem 1.5rem 1.8rem}
+.owner-av{width:100%;aspect-ratio:3/4;overflow:hidden;margin-bottom:1.3rem;position:relative;border:1px solid rgba(201,168,76,.2)}
+.owner-av img{width:100%;height:100%;object-fit:cover;object-position:center top;filter:grayscale(15%) contrast(1.05);transition:transform .5s ease,filter .5s ease}
+.owner-card:hover .owner-av img{transform:scale(1.04);filter:grayscale(0%) contrast(1.05)}
+.owner-av::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(10,22,40,.55) 100%);pointer-events:none}
+.owner-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:var(--white);margin-bottom:.3rem}
+.owner-role{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.owner-div{width:28px;height:1px;background:rgba(201,168,76,.3);margin:1rem 0}
+.owner-desc{font-size:.75rem;color:var(--muted);font-weight:300;line-height:1.7}
+
+/* CONTACT */
+#contact{background:linear-gradient(135deg,var(--navy-mid),var(--navy));position:relative;overflow:hidden}
+#contact::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.05),transparent 70%);top:50%;left:30%;transform:translate(-50%,-50%)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;position:relative;z-index:1}
+.contact-info h2{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--white);line-height:1.1;margin-bottom:1.2rem}
+.contact-info h2 em{color:var(--gold);font-style:italic}
+.contact-info>p{font-size:.82rem;color:var(--muted);line-height:1.8;font-weight:300;margin-bottom:2.5rem}
+.c-details{display:flex;flex-direction:column;gap:1.4rem}
+.c-item{display:flex;align-items:flex-start;gap:1rem}
+.c-icon{width:38px;height:38px;border:1px solid rgba(201,168,76,.22);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.95rem;flex-shrink:0}
+.c-label{font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+.c-val{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream);line-height:1.5}
+.form-box{background:rgba(255,255,255,.02);border:1px solid rgba(201,168,76,.1);padding:2.8rem}
+.f-group{margin-bottom:1.3rem}
+.f-label{display:block;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.f-input,.f-textarea{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.14);color:var(--cream);padding:.75rem 1rem;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:300;outline:none;transition:border-color .3s}
+.f-input:focus,.f-textarea:focus{border-color:rgba(201,168,76,.45)}
+.f-textarea{min-height:90px;resize:vertical}
+.f-input::placeholder,.f-textarea::placeholder{color:rgba(138,155,181,.45)}
+.f-submit{width:100%;background:var(--gold);color:var(--navy);border:none;padding:.95rem;font-family:'Montserrat',sans-serif;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;cursor:pointer;transition:all .3s}
+.f-submit:hover{background:var(--gold-light);box-shadow:0 8px 30px rgba(201,168,76,.25)}
+
+/* FOOTER */
+footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,76,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem}
+.footer-logo{display:flex;align-items:center;gap:.8rem}
+.footer-logo img{height:38px;filter:drop-shadow(0 0 6px rgba(201,168,76,.2))}
+.footer-brand-text .brand{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);letter-spacing:.1em}
+.footer-brand-text .gstin{font-size:.6rem;color:rgba(138,155,181,.5);letter-spacing:.08em;margin-top:.2rem}
+.footer-center{text-align:center;font-size:.68rem;color:var(--muted);line-height:1.8}
+.footer-center a{color:var(--gold);text-decoration:none}
+.footer-right{text-align:right;font-size:.65rem;color:rgba(138,155,181,.5)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scrollPulse{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.fade-in{opacity:0;transform:translateY(25px);transition:opacity .7s ease,transform .7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}nav ul{display:none}
+  section{padding:4rem 1.5rem}
+  #hero{padding:5rem 1.5rem 8rem}
+  .hero-emblem{display:none}
+  .about-grid,.contact-grid,.sub-grid,.product-panel{grid-template-columns:1fr;gap:2.5rem}
+  .owners-grid{grid-template-columns:1fr 1fr}
+  .products-header{grid-template-columns:1fr;gap:1.5rem}
+  footer{flex-direction:column;text-align:center;padding:2rem 1.5rem}
+  .hero-stats-bar{left:1.5rem;right:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <img src="logo.png" alt="4M Traders Logo" style="mix-blend-mode:normal;filter:drop-shadow(0 0 6px rgba(201,168,76,.3))" onerror="this.style.display='none'">
+    <div class="nav-logo-text">4M Traders<span>Import &amp; Export</span></div>
+  </a>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#subsidiaries">Companies</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#owners">Leadership</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-ring"></div><div class="hero-ring"></div><div class="hero-ring"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Ernakulam, Kerala · Est. 2026</span>
+    </div>
+    <h1 class="hero-title">Four M<br><em>Traders</em></h1>
+    <p class="hero-subtitle">Connecting Markets. Delivering Value.</p>
+    <p class="hero-desc">A distinguished partnership firm specialising in the global trade of premium wood-based products, veneers, and industrial resins. Trusted across the supply chain.</p>
+    <div class="hero-cta">
+      <a href="#products" class="btn-primary">Explore Products</a>
+      <a href="#contact" class="btn-secondary">Get In Touch →</a>
+    </div>
+
+    <div class="hero-credentials">
+      <div class="hero-cred-item">
+        <div class="hero-cred-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+        </div>
+        <div class="hero-cred-text">
+          <span class="hero-cred-label">GST Registration</span>
+          <span class="hero-cred-value">32AALFF0398R1ZT</span>
+        </div>
+
+      </div>
+      <div class="hero-cred-divider"></div>
+      <div class="hero-cred-item">
+        <div class="hero-cred-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="hero-cred-text">
+          <span class="hero-cred-label">IEC · Importer-Exporter Code</span>
+          <span class="hero-cred-value">AALFF0398R</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-emblem">
+    <img src="logo.png" alt="Four M Traders">
+  </div>
+
+  <div class="hero-stats-bar">
+    <div class="stat-pill"><span class="stat-num">2</span><span class="stat-lbl">Subsidiaries</span></div>
+    <div class="stat-pill"><span class="stat-num">5</span><span class="stat-lbl">Product Lines</span></div>
+    <div class="stat-pill"><span class="stat-num">30<sup style="font-size:1rem">+</sup></span><span class="stat-lbl">Years Legacy</span></div>
+    <div class="stat-pill"><span class="stat-num">4</span><span class="stat-lbl">Partners</span></div>
+    <div class="stat-pill"><span class="stat-num">IEC</span><span class="stat-lbl">Certified Exporter</span></div>
+  </div>
+
+  <div class="scroll-ind"><span>Scroll</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text fade-in">
+      <div class="sec-label"><div class="sec-label-line"></div><span>Our Identity</span></div>
+      <h2 class="sec-title">Built on <em>Trust</em>,<br>Scaled by Vision</h2>
+      <p>Four M Traders is a Kerala-based partnership firm operating at the intersection of domestic manufacturing and global commerce. With deep roots in the wood and resin industry, we have established ourselves as a reliable conduit for premium raw materials and processed goods.</p>
+      <p>Registered under the Goods and Services Tax framework and authorised under India's Importer-Exporter Code, we operate with full regulatory compliance across both national and international supply chains.</p>
+      <div class="cred-grid">
+        <div class="cred-card"><div class="cred-lbl">GSTIN</div><div class="cred-val">32AALFF0398R1ZT</div></div>
+        <div class="cred-card"><div class="cred-lbl">IEC Code</div><div class="cred-val">AALFF0398R</div></div>
+        <div class="cred-card"><div class="cred-lbl">PAN</div><div class="cred-val">AALFF0398R</div></div>
+        <div class="cred-card"><div class="cred-lbl">Type</div><div class="cred-val">Partnership · Regular</div></div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="logo-box">
+        <img src="logo.png" alt="Four M Traders" onerror="this.outerHTML='<div style=\'text-align:center;padding:2rem\'><div style=\'font-family:Cormorant Garamond,serif;font-size:3rem;color:#c9a84c\'>4M</div><div style=\'font-family:Cormorant Garamond,serif;font-size:1.5rem;color:#fff;letter-spacing:.3em\'>TRADERS</div><div style=\'font-size:.6rem;letter-spacing:.3em;color:#8a9bb5;margin-top:.5rem\'>IMPORT &amp; EXPORT</div></div>'">
+      </div>
+      <div class="reg-strip">
+        <div class="reg-item"><span class="reg-lbl">GST Registered</span><span class="reg-val">06 Feb 2026</span></div>
+        <div class="reg-item"><span class="reg-lbl">IEC Issued</span><span class="reg-val">02 Mar 2026</span></div>
+        <div class="reg-item"><span class="reg-lbl">State Code</span><span class="reg-val">Kerala · 32</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSIDIARIES -->
+<section id="subsidiaries">
+  <div class="sec-label fade-in"><div class="sec-label-line"></div><span>Group Companies</span></div>
+  <h2 class="sec-title fade-in">A Legacy of <em>Manufacturing</em></h2>
+  <div class="sub-grid">
+    <div class="sub-card fade-in">
+      <div class="sub-num">01</div>
+      <div class="sub-since">Since 1996</div>
+      <h3 class="sub-name">Galaxy Plywoods</h3>
+      <div class="sub-div"></div>
+      <p class="sub-desc">A legacy plywood manufacturer with nearly three decades of expertise crafting high-quality board and panel products. Galaxy Plywoods stands as one of Kerala's established names in wood processing, serving builders, contractors, and furniture makers across the region.</p>
+    </div>
+    <div class="sub-card fade-in">
+      <div class="sub-num">02</div>
+      <div class="sub-since">Subsidiary</div>
+      <h3 class="sub-name">Amino Resin<br>Manufacturers</h3>
+      <div class="sub-div"></div>
+      <p class="sub-desc">Specialising in the production of amino-based thermosetting resins used in wood bonding, laminates, and surface treatments. Our resin unit supplies critical industrial adhesives powering the plywood and panel products sector across Kerala and beyond.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="products-header">
+    <div class="fade-in">
+      <div class="sec-label"><div class="sec-label-line"></div><span>What We Trade</span></div>
+      <h2 class="sec-title">Our <em>Product</em><br>Portfolio</h2>
+    </div>
+    <p class="fade-in">From raw timber to finished panels and chemical binders, Four M Traders handles a comprehensive range of wood-based commodities. Our import-export capabilities ensure consistent quality sourcing from global markets while supplying domestic manufacturers with the inputs they need.</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="product-tabs fade-in">
+    <button class="prod-tab active" data-tab="face-veneer">Face Veneers</button>
+    <button class="prod-tab" data-tab="core-veneer">Core Veneer</button>
+    <button class="prod-tab" data-tab="wood-logs">Wood Logs</button>
+    <button class="prod-tab" data-tab="plywood">Plywood</button>
+    <button class="prod-tab" data-tab="resin">Resin</button>
+  </div>
+
+  <!-- FACE VENEERS -->
+  <div class="product-panel active fade-in" id="tab-face-veneer">
+    <div>
+      <div class="carousel-wrap" data-carousel="fv">
+        <div class="carousel-track">
+          <div class="carousel-slide"><div class="wood-slide"><img src="/mnt/user-data/uploads/natural_teak_face.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">Natural Teak Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Quercus_robur_wood_ray.jpg/1280px-Quercus_robur_wood_ray.jpg" alt="White Oak Veneer" onerror="this.parentElement.style.background='#C4A882'"><div class="slide-badge"><span class="slide-variant">White Oak Veneer</span><span class="slide-spec">Quarter Sliced · FSC Certified</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Juglans_regia_wood_ray.jpg/1280px-Juglans_regia_wood_ray.jpg" alt="Walnut Veneer" onerror="this.parentElement.style.background='#4A2E1A'"><div class="slide-badge"><span class="slide-variant">Walnut Veneer</span><span class="slide-spec">Crown Cut · Decorative Grade</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Acer_saccharum_wood_ray.jpg/1280px-Acer_saccharum_wood_ray.jpg" alt="Hard Maple Veneer" onerror="this.parentElement.style.background='#F0E0C0'"><div class="slide-badge"><span class="slide-variant">Hard Maple Veneer</span><span class="slide-spec">Rotary Cut · Uniform Grain</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Betula_pendula_wood_ray.jpg/1280px-Betula_pendula_wood_ray.jpg" alt="Baltic Birch Veneer" onerror="this.parentElement.style.background='#E8DCC8'"><div class="slide-badge"><span class="slide-variant">Baltic Birch Veneer</span><span class="slide-spec">Plain Sliced · Interior Grade</span></div></div></div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="fv">‹</button>
+          <button class="car-btn" data-dir="next" data-target="fv">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-fv"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Face Veneers</h3>
+      <p class="prod-subtitle">Premium Decorative Wood Surfaces</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">Our face veneers are sourced from certified forests across Asia, Africa, and Europe. Available in multiple species, cuts, and thicknesses — each sheet is graded for visual consistency, grain clarity, and surface finish to meet the demands of furniture, cabinetry, and architectural panelling.</p>
+      <div class="variants-title">Available Variants</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="fv" data-index="0"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">Natural Teak</span><span class="variant-spec">0.5–2mm</span></div>
+        <div class="variant-item" data-carousel="fv" data-index="1"><div class="variant-swatch" style="background:linear-gradient(135deg,#C4A882,#D4B896)"></div><span class="variant-name">White Oak</span><span class="variant-spec">0.6–1.5mm</span></div>
+        <div class="variant-item" data-carousel="fv" data-index="2"><div class="variant-swatch" style="background:linear-gradient(135deg,#4A2E1A,#6B3E24)"></div><span class="variant-name">Walnut</span><span class="variant-spec">0.5–1mm</span></div>
+        <div class="variant-item" data-carousel="fv" data-index="3"><div class="variant-swatch" style="background:linear-gradient(135deg,#F0E0C0,#E8D4A8)"></div><span class="variant-name">Hard Maple</span><span class="variant-spec">0.6–2mm</span></div>
+        <div class="variant-item" data-carousel="fv" data-index="4"><div class="variant-swatch" style="background:linear-gradient(135deg,#E8DCC8,#F0E8D4)"></div><span class="variant-name">Baltic Birch</span><span class="variant-spec">0.5–1.5mm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORE VENEER -->
+  <div class="product-panel" id="tab-core-veneer">
+    <div>
+      <div class="carousel-wrap" data-carousel="cv">
+        <div class="carousel-track">
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Populus_nigra_wood.jpg/1280px-Populus_nigra_wood.jpg" alt="Poplar Core Veneer" onerror="this.parentElement.style.background='#C8D4A8'"><div class="slide-badge"><span class="slide-variant">Poplar Core Veneer</span><span class="slide-spec">1.5mm – 3mm · Lightweight</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Eucalyptus_wood_texture.jpg/1280px-Eucalyptus_wood_texture.jpg" alt="Eucalyptus Core" onerror="this.parentElement.style.background='#8B9A6A'"><div class="slide-badge"><span class="slide-variant">Eucalyptus Core</span><span class="slide-spec">High Density · Moisture Resistant</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Pinus_radiata_wood_ray.jpg/1280px-Pinus_radiata_wood_ray.jpg" alt="Radiata Pine Core" onerror="this.parentElement.style.background='#D4B882'"><div class="slide-badge"><span class="slide-variant">Radiata Pine Core</span><span class="slide-spec">Structural Grade · 2mm – 4mm</span></div></div></div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="cv">‹</button>
+          <button class="car-btn" data-dir="next" data-target="cv">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-cv"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Core Veneer</h3>
+      <p class="prod-subtitle">Structural Inner Layers for Plywood</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">Core veneers form the structural backbone of plywood panels. We supply high-quality cross-band and centre veneers in multiple species, each selected for density, uniformity, and compatibility with industrial adhesive systems including UF and PF resins.</p>
+      <div class="variants-title">Available Variants</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="cv" data-index="0"><div class="variant-swatch" style="background:linear-gradient(135deg,#C8D4A8,#A8B878)"></div><span class="variant-name">Poplar</span><span class="variant-spec">1.5–3mm</span></div>
+        <div class="variant-item" data-carousel="cv" data-index="1"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B9A6A,#A0AE7A)"></div><span class="variant-name">Eucalyptus</span><span class="variant-spec">2–4mm</span></div>
+        <div class="variant-item" data-carousel="cv" data-index="2"><div class="variant-swatch" style="background:linear-gradient(135deg,#D4B882,#C4A46A)"></div><span class="variant-name">Radiata Pine</span><span class="variant-spec">2–4mm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WOOD LOGS -->
+  <div class="product-panel" id="tab-wood-logs">
+    <div>
+      <div class="carousel-wrap" data-carousel="wl">
+        <div class="carousel-track">
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Tectona_grandis_-_teak_logs_at_Kollegal.jpg/1280px-Tectona_grandis_-_teak_logs_at_Kollegal.jpg" alt="Teak Logs" onerror="this.parentElement.style.background='#5A3010'"><div class="slide-badge"><span class="slide-variant">Teak Logs</span><span class="slide-spec">Grade A · Dia 40–80cm · Myanmar Origin</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Rubber_wood_logs.jpg/1280px-Rubber_wood_logs.jpg" alt="Rubberwood Logs" onerror="this.parentElement.style.background='#8A7050'"><div class="slide-badge"><span class="slide-variant">Rubberwood Logs</span><span class="slide-spec">Plantation Grown · Kerala Origin</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Eucalyptus_logs.jpg/1280px-Eucalyptus_logs.jpg" alt="Eucalyptus Logs" onerror="this.parentElement.style.background='#6A7848'"><div class="slide-badge"><span class="slide-variant">Eucalyptus Logs</span><span class="slide-spec">Fast Growth · High Yield</span></div></div></div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="wl">‹</button>
+          <button class="car-btn" data-dir="next" data-target="wl">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-wl"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Wood Logs</h3>
+      <p class="prod-subtitle">Premium Timber for Processing</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">We source and trade raw timber logs for peeling, slicing, and sawing operations. Our logs are procured from certified forests and plantation sources across India and Southeast Asia, graded by diameter, length, and species for downstream veneer and plywood production.</p>
+      <div class="variants-title">Available Species</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="wl" data-index="0"><div class="variant-swatch" style="background:radial-gradient(circle,#6B3C18,#3A2008)"></div><span class="variant-name">Teak</span><span class="variant-spec">Myanmar / Indian</span></div>
+        <div class="variant-item" data-carousel="wl" data-index="1"><div class="variant-swatch" style="background:radial-gradient(circle,#9A8060,#584830)"></div><span class="variant-name">Rubberwood</span><span class="variant-spec">Kerala Origin</span></div>
+        <div class="variant-item" data-carousel="wl" data-index="2"><div class="variant-swatch" style="background:radial-gradient(circle,#788858,#405030)"></div><span class="variant-name">Eucalyptus</span><span class="variant-spec">Plantation</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLYWOOD -->
+  <div class="product-panel" id="tab-plywood">
+    <div>
+      <div class="carousel-wrap" data-carousel="pw">
+        <div class="carousel-track">
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Plywood_texture.jpg/1280px-Plywood_texture.jpg" alt="Commercial Plywood" onerror="this.parentElement.style.background='#C8A870'"><div class="slide-badge"><span class="slide-variant">Commercial Plywood</span><span class="slide-spec">MR Grade · 3mm – 25mm · IS 303</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Plywood_with_finger_joint.jpg/1280px-Plywood_with_finger_joint.jpg" alt="Marine Plywood" onerror="this.parentElement.style.background='#8A6A40'"><div class="slide-badge"><span class="slide-variant">Marine Plywood</span><span class="slide-spec">BWR Grade · Waterproof · IS 710</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Sperrholz.jpg/1280px-Sperrholz.jpg" alt="BWP Plywood" onerror="this.parentElement.style.background='#6A5030'"><div class="slide-badge"><span class="slide-variant">BWP Plywood</span><span class="slide-spec">Boiling Water Proof · Phenolic Glue</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Bending_plywood.jpg/1280px-Bending_plywood.jpg" alt="Flexible Plywood" onerror="this.parentElement.style.background='#B89060'"><div class="slide-badge"><span class="slide-variant">Flexible Plywood</span><span class="slide-spec">Bending Grade · Furniture Use</span></div></div></div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="pw">‹</button>
+          <button class="car-btn" data-dir="next" data-target="pw">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-pw"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Plywood</h3>
+      <p class="prod-subtitle">Engineered Panels for Every Application</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">Galaxy Plywoods, our sister concern since 1996, manufactures a comprehensive range of plywood panels meeting ISI standards. From moisture-resistant commercial grades to fully waterproof BWP boards, our plywood is trusted by builders, furniture makers, and architects across South India.</p>
+      <div class="variants-title">Available Grades</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="pw" data-index="0"><div class="variant-swatch" style="background:linear-gradient(135deg,#C8A870,#A87840)"></div><span class="variant-name">Commercial (MR)</span><span class="variant-spec">IS 303</span></div>
+        <div class="variant-item" data-carousel="pw" data-index="1"><div class="variant-swatch" style="background:linear-gradient(135deg,#8A6A40,#6A5030)"></div><span class="variant-name">Marine (BWR)</span><span class="variant-spec">IS 710</span></div>
+        <div class="variant-item" data-carousel="pw" data-index="2"><div class="variant-swatch" style="background:linear-gradient(135deg,#6A5030,#4A3020)"></div><span class="variant-name">BWP Waterproof</span><span class="variant-spec">Phenolic</span></div>
+        <div class="variant-item" data-carousel="pw" data-index="3"><div class="variant-swatch" style="background:linear-gradient(135deg,#B89060,#A07840)"></div><span class="variant-name">Flexible Grade</span><span class="variant-spec">Bending</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESIN -->
+  <div class="product-panel" id="tab-resin">
+    <div>
+      <div class="carousel-wrap" data-carousel="rs">
+        <div class="carousel-track">
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Urea-formaldehyde_glue.jpg/1280px-Urea-formaldehyde_glue.jpg" alt="UF Resin" onerror="this.parentElement.style.background='linear-gradient(135deg,#F5F2EA,#E8E4D8)'"><div class="slide-badge"><span class="slide-variant">Urea Formaldehyde (UF) Resin</span><span class="slide-spec">Interior Grade · MR Plywood</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Melamine_resin_production.jpg/1280px-Melamine_resin_production.jpg" alt="MUF Resin" onerror="this.parentElement.style.background='linear-gradient(135deg,#D8E4F8,#B8C8E8)'"><div class="slide-badge"><span class="slide-variant">Melamine Urea (MUF) Resin</span><span class="slide-spec">High Performance · BWR Grade</span></div></div></div>
+          <div class="carousel-slide"><div class="wood-slide"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Phenol-formaldehyde_resin.jpg/1280px-Phenol-formaldehyde_resin.jpg" alt="PF Resin" onerror="this.parentElement.style.background='linear-gradient(135deg,#4A2810,#3A2008)'"><div class="slide-badge"><span class="slide-variant">Phenol Formaldehyde (PF) Resin</span><span class="slide-spec">Exterior / Marine Grade · BWP</span></div></div></div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="rs">‹</button>
+          <button class="car-btn" data-dir="next" data-target="rs">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-rs"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Resin</h3>
+      <p class="prod-subtitle">Industrial Adhesives for Wood Processing</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">Manufactured by our amino resin subsidiary, our thermosetting adhesives are formulated for plywood pressing, laminate bonding, and particle board production. We offer Urea Formaldehyde, Melamine Urea, and Phenol Formaldehyde grades to match every performance and budget requirement.</p>
+      <div class="variants-title">Resin Types</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="rs" data-index="0"><div class="variant-swatch" style="background:linear-gradient(135deg,#F5F2EA,#D8D4C8)"></div><span class="variant-name">UF Resin</span><span class="variant-spec">Interior / MR</span></div>
+        <div class="variant-item" data-carousel="rs" data-index="1"><div class="variant-swatch" style="background:linear-gradient(135deg,#D8E4F8,#B8C8E8)"></div><span class="variant-name">MUF Resin</span><span class="variant-spec">BWR Grade</span></div>
+        <div class="variant-item" data-carousel="rs" data-index="2"><div class="variant-swatch" style="background:linear-gradient(135deg,#4A2810,#2A1408)"></div><span class="variant-name">PF Resin</span><span class="variant-spec">Marine / BWP</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OWNERS -->
+<section id="owners">
+  <div class="sec-label fade-in"><div class="sec-label-line"></div><span>Leadership</span></div>
+  <h2 class="sec-title fade-in">The <em>Partnership</em> Behind the Vision</h2>
+  <div class="owners-grid">
+    <div class="owner-card fade-in">
+      <div class="owner-av"><img src="/mnt/user-data/uploads/1774246047570_IMG_9727_JPG.jpeg" alt="Partner 1"></div>
+      <div class="owner-card-body">
+        <div class="owner-name">Sharaf Rasheed</div>
+        <div class="owner-role">Managing Partner</div>
+        <div class="owner-div"></div>
+        <p class="owner-desc">Principal signatory and managing partner steering the strategic direction of Four M Traders and its group enterprises.</p>
+      </div>
+    </div>
+    <div class="owner-card fade-in">
+      <div class="owner-av"><img src="/mnt/user-data/uploads/1774246069933_IMG_9682.PNG" alt="Partner 2"></div>
+      <div class="owner-card-body">
+        <div class="owner-name">Sidhiq MM</div>
+        <div class="owner-role">Partner</div>
+        <div class="owner-div"></div>
+        <p class="owner-desc">Brings operational expertise and business acumen to the firm's trading and manufacturing activities.</p>
+      </div>
+    </div>
+    <div class="owner-card fade-in">
+      <div class="owner-av"><img src="/mnt/user-data/uploads/1774246081573_IMG_9521.PNG" alt="Partner 3"></div>
+      <div class="owner-card-body">
+        <div class="owner-name">Binshad KN</div>
+        <div class="owner-role">Partner</div>
+        <div class="owner-div"></div>
+        <p class="owner-desc">Deep industry knowledge in plywood and wood-based products strengthens the partnership's collective capabilities.</p>
+      </div>
+    </div>
+    <div class="owner-card fade-in">
+      <div class="owner-av"><img src="/mnt/user-data/uploads/1774246087994_IMG_9520.PNG" alt="Partner 4"></div>
+      <div class="owner-card-body">
+        <div class="owner-name">Ali CM</div>
+        <div class="owner-role">Partner</div>
+        <div class="owner-div"></div>
+        <p class="owner-desc">Instrumental in trade operations and vendor relationships, ensuring seamless supply chain connectivity.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="contact-info fade-in">
+      <div class="sec-label"><div class="sec-label-line"></div><span>Get In Touch</span></div>
+      <h2>Let's <em>Build</em><br>Together</h2>
+      <p>Whether you're a manufacturer seeking premium raw materials, a buyer looking for reliable export partners, or a business exploring long-term trade relationships — we're ready to connect.</p>
+      <div class="c-details">
+        <div class="c-item">
+          <div class="c-icon">📞</div>
+          <div><span class="c-label">Phone</span><span class="c-val">+91 751-1100277</span></div>
+        </div>
+        <div class="c-item">
+          <div class="c-icon">📱</div>
+          <div><span class="c-label">WhatsApp / Alternate</span><span class="c-val">+91 92072 21116</span></div>
+        </div>
+        <div class="c-item">
+          <div class="c-icon">📍</div>
+          <div><span class="c-label">Registered Address</span><span class="c-val">8/957-D, Prathankavala,<br>Allapura Kuttipadam Road,<br>Vengola, Ernakulam, Kerala – 683556</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-box fade-in">
+      <div class="sec-label" style="margin-bottom:1.5rem"><div class="sec-label-line"></div><span>Send Enquiry</span></div>
+      <div class="f-group"><label class="f-label">Your Name</label><input type="text" class="f-input" placeholder="Full Name"></div>
+      <div class="f-group"><label class="f-label">Company / Organisation</label><input type="text" class="f-input" placeholder="Company Name"></div>
+      <div class="f-group"><label class="f-label">Phone / Email</label><input type="text" class="f-input" placeholder="+91 or email address"></div>
+      <div class="f-group"><label class="f-label">Product Interest</label>
+        <select class="f-input" style="appearance:none;cursor:pointer">
+          <option value="" style="background:#112040">Select a product...</option>
+          <option style="background:#112040">Face Veneers</option>
+          <option style="background:#112040">Core Veneer</option>
+          <option style="background:#112040">Wood Logs</option>
+          <option style="background:#112040">Plywood</option>
+          <option style="background:#112040">Resin</option>
+        </select>
+      </div>
+      <div class="f-group"><label class="f-label">Message</label><textarea class="f-textarea" placeholder="Tell us about your requirements..."></textarea></div>
+      <button class="f-submit" onclick="alert('Thank you for your enquiry. Our team will contact you shortly.')">Send Enquiry →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="logo.png" alt="4M Traders" onerror="this.style.display='none'">
+    <div class="footer-brand-text">
+      <div class="brand">Four M Traders</div>
+      <div class="gstin">GSTIN: 32AALFF0398R1ZT · IEC: AALFF0398R</div>
+    </div>
+  </div>
+  <div class="footer-center">
+    Vengola, Ernakulam, Kerala – 683556<br>
+    <a href="tel:+917511100277">+91 751-1100277</a> &nbsp;·&nbsp; <a href="tel:+919207221116">+91 92072 21116</a>
+  </div>
+  <div class="footer-right">© 2026 Four M Traders<br>All Rights Reserved</div>
+</footer>
+
+<script>
+// ─── CAROUSEL ENGINE ───
+const carousels = {};
+
+function initCarousel(id) {
+  const wrap = document.querySelector(`[data-carousel="${id}"]`);
+  if (!wrap) return;
+  const track = wrap.querySelector('.carousel-track');
+  const slides = track.querySelectorAll('.carousel-slide');
+  const dotsContainer = document.getElementById('dots-' + id);
+  let current = 0;
+  let timer;
+
+  // Build dots
+  dotsContainer.innerHTML = '';
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'car-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(n) {
+    current = (n + slides.length) % slides.length;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dotsContainer.querySelectorAll('.car-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    // Sync variant items
+    document.querySelectorAll(`.variant-item[data-carousel="${id}"]`).forEach((v, i) => v.classList.toggle('active', i === current));
+    resetTimer();
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => goTo(current + 1), 3800);
+  }
+
+  carousels[id] = { goTo };
+  resetTimer();
+}
+
+// Init all carousels
+['fv','cv','wl','pw','rs'].forEach(initCarousel);
+
+// Arrow buttons
+document.querySelectorAll('.car-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.target;
+    const dir = btn.dataset.dir;
+    if (carousels[id]) {
+      const dotsContainer = document.getElementById('dots-' + id);
+      const active = dotsContainer.querySelector('.car-dot.active');
+      const dots = [...dotsContainer.querySelectorAll('.car-dot')];
+      const cur = dots.indexOf(active);
+      carousels[id].goTo(dir === 'next' ? cur + 1 : cur - 1);
+    }
+  });
+});
+
+// Variant click → jump carousel
+document.querySelectorAll('.variant-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const id = item.dataset.carousel;
+    const idx = parseInt(item.dataset.index);
+    if (carousels[id]) carousels[id].goTo(idx);
+  });
+});
+
+// ─── PRODUCT TABS ───
+document.querySelectorAll('.prod-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.prod-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.product-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    const panel = document.getElementById('tab-' + tab.dataset.tab);
+    if (panel) { panel.classList.add('active'); }
+  });
+});
+
+// ─── SCROLL FADE-IN ───
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), (e.target.dataset.delay || 0));
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach((el, i) => {
+  el.dataset.delay = (i % 4) * 100;
+  obs.observe(el);
+});
+
+// ─── NAV SCROLL HIGHLIGHT ───
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav ul a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 160) cur = s.id; });
+  navLinks.forEach(a => { a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--gold)' : ''; });
+});
+</script>
+</body>
+</html>
