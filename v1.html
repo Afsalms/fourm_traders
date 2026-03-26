@@ -190,15 +190,18 @@ section{padding:6rem 4rem}
 /* Product Panel */
 .product-panel{display:none}
 .product-panel.active{display:grid;grid-template-columns:1.3fr 1fr;gap:3.5rem;align-items:start}
+@media(max-width:900px){
+  .product-panel.active{grid-template-columns:1fr;gap:2rem}
+}
 
 /* Carousel */
 .carousel-wrap{position:relative;overflow:hidden;border:1px solid rgba(201,168,76,.15)}
 .carousel-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
 .carousel-slide{min-width:100%;position:relative;overflow:hidden}
-.carousel-img{width:100%;height:380px;object-fit:cover;display:block}
+.carousel-img{width:100%;height:clamp(200px,40vw,380px);object-fit:cover;display:block}
 
 /* Real image slides */
-.wood-slide{width:100%;height:380px;position:relative;overflow:hidden}
+.wood-slide{width:100%;height:clamp(200px,40vw,380px);position:relative;overflow:hidden}
 .wood-slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 6s ease}
 .wood-slide:hover img{transform:scale(1.04)}
 
@@ -289,11 +292,54 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
   section{padding:4rem 1.5rem}
   #hero{padding:5rem 1.5rem 8rem}
   .hero-emblem{display:none}
-  .about-grid,.contact-grid,.sub-grid,.product-panel{grid-template-columns:1fr;gap:2.5rem}
+  .about-grid,.contact-grid,.sub-grid,.product-panel.active{grid-template-columns:1fr;gap:2.5rem}
   .owners-grid{grid-template-columns:1fr 1fr}
   .products-header{grid-template-columns:1fr;gap:1.5rem}
   footer{flex-direction:column;text-align:center;padding:2rem 1.5rem}
-  .hero-stats-bar{left:1.5rem;right:1.5rem}
+  .hero-stats-bar{left:1.5rem;right:1.5rem;bottom:1.5rem}
+
+  /* GST / IEC credentials block */
+  .hero-credentials{
+    flex-direction:column;
+    max-width:100%;
+  }
+  .hero-cred-divider{
+    width:100%;
+    height:1px;
+    align-self:stretch;
+  }
+  .hero-cred-item{
+    padding:.85rem 1rem;
+  }
+  .hero-cred-value{
+    white-space:normal;
+    word-break:break-all;
+    font-size:.85rem;
+  }
+  .hero-cred-label{
+    white-space:normal;
+  }
+
+  /* Products section */
+  .product-tabs{gap:0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .prod-tab{padding:.7rem 1.1rem;font-size:.6rem;white-space:nowrap;flex-shrink:0}
+  .carousel-img,.wood-slide,.wood-slide img{height:240px}
+  .prod-info .prod-title{font-size:1.7rem}
+
+  /* About reg-strip */
+  .reg-strip{grid-template-columns:1fr}
+  .reg-item{border-right:none;border-bottom:1px solid rgba(201,168,76,.1)}
+  .reg-item:last-child{border-bottom:none}
+}
+
+@media(max-width:480px){
+  .hero-stats-bar{flex-direction:column;gap:0;position:static;margin-top:2rem}
+  .stat-pill{border-right:1px solid rgba(201,168,76,.12);border-bottom:none}
+  .stat-pill:last-child{border-right:1px solid rgba(201,168,76,.12)}
+  .owners-grid{grid-template-columns:1fr}
+  .cred-grid{grid-template-columns:1fr}
+  .hero-credentials{margin-top:2rem}
+  .hero-cred-badge{display:none}
 }
 </style>
 </head>
@@ -333,6 +379,7 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
     </div>
 
     <div class="hero-credentials">
+      
       <div class="hero-cred-item">
         <div class="hero-cred-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
@@ -352,7 +399,6 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
           <span class="hero-cred-label">IEC · Importer-Exporter Code</span>
           <span class="hero-cred-value">AALFF0398R</span>
         </div>
-
       </div>
     </div>
   </div>
@@ -436,6 +482,7 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
   <!-- TABS -->
   <div class="product-tabs fade-in">
     <button class="prod-tab active" data-tab="face-veneer">Face Veneers</button>
+    <button class="prod-tab" data-tab="decorative-face-veneer">Decorative Face Veneers</button>
     <button class="prod-tab" data-tab="core-veneer">Core Veneer</button>
     <button class="prod-tab" data-tab="wood-logs">Wood Logs</button>
     <button class="prod-tab" data-tab="plywood">Plywood</button>
@@ -444,6 +491,69 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
 
   <!-- FACE VENEERS -->
   <div class="product-panel active fade-in" id="tab-face-veneer">
+    <div>
+      <div class="carousel-wrap" data-carousel="fva">
+        <div class="carousel-track">
+          <div class="carousel-slide">
+            <div class="wood-slide">
+              <img src="images/okuma.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">Okuma Face Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div>
+            </div>
+          </div>
+          <div class="carousel-slide">
+            <div class="wood-slide">
+              <img src="images/natural_teak_face.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">Gurjan Face Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="wood-slide">
+              <img src="images/natural_teak_face.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">PA and PQ Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="wood-slide">
+              <img src="images/natural_teak_face.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">Bintagore Face Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="wood-slide">
+              <img src="images/natural_teak_face.png" alt="Natural Teak Veneer" onerror="this.parentElement.style.background='linear-gradient(160deg,#8B5E3C,#C49A6C)'"><div class="slide-badge"><span class="slide-variant">White recorn Face Veneer</span><span class="slide-spec">Premium · A Grade · 0.5mm – 2mm</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <div class="carousel-arrows">
+          <button class="car-btn" data-dir="prev" data-target="fva">‹</button>
+          <button class="car-btn" data-dir="next" data-target="fva">›</button>
+        </div>
+        <div class="carousel-dots" id="dots-fva"></div>
+      </div>
+    </div>
+    <div class="prod-info">
+      <h3 class="prod-title">Face Veneers</h3>
+      <p class="prod-subtitle">Premium Wood Surfaces</p>
+      <div class="prod-divider"></div>
+      <p class="prod-desc">Our face veneers are sourced from certified forests across Asia, Africa, and Europe. Available in multiple species, cuts, and thicknesses — each sheet is graded for visual consistency, grain clarity, and surface finish to meet the demands of furniture, cabinetry, and architectural panelling.</p>
+      <div class="variants-title">Available Variants</div>
+      <div class="variant-list">
+        <div class="variant-item active" data-carousel="fva" data-index="0"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">Okuma Face Veneer</span><span class="variant-spec">0.5–2mm</span></div>
+
+        <div class="variant-item active" data-carousel="fva" data-index="1"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">Gurjan Face Veneer</span><span class="variant-spec">0.5–2mm</span></div>
+
+        <div class="variant-item active" data-carousel="fva" data-index="2"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">PA and PQ Veneer</span><span class="variant-spec">0.5–2mm</span></div>
+
+        <div class="variant-item active" data-carousel="fva" data-index="3"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">Bintagore Face Veneer</span><span class="variant-spec">0.5–2mm</span></div>
+
+        <div class="variant-item active" data-carousel="fva" data-index="4"><div class="variant-swatch" style="background:linear-gradient(135deg,#8B5E3C,#C49A6C)"></div><span class="variant-name">White recorn Face Veneer</span><span class="variant-spec">0.5–2mm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACE VENEERS -->
+  <div class="product-panel fade-in" id="tab-decorative-face-veneer">
     <div>
       <div class="carousel-wrap" data-carousel="fv">
         <div class="carousel-track">
@@ -462,7 +572,7 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
       </div>
     </div>
     <div class="prod-info">
-      <h3 class="prod-title">Face Veneers</h3>
+      <h3 class="prod-title">Decorative Face Veneers</h3>
       <p class="prod-subtitle">Premium Decorative Wood Surfaces</p>
       <div class="prod-divider"></div>
       <p class="prod-desc">Our face veneers are sourced from certified forests across Asia, Africa, and Europe. Available in multiple species, cuts, and thicknesses — each sheet is graded for visual consistency, grain clarity, and surface finish to meet the demands of furniture, cabinetry, and architectural panelling.</p>
@@ -669,7 +779,7 @@ footer{background:#040d07;padding:2.5rem 4rem;border-top:1px solid rgba(201,168,
         </div>
         <div class="c-item">
           <div class="c-icon">📍</div>
-          <div><span class="c-label">Registered Address</span><span class="c-val">8/957-D, Prathankavala,<br>Allapura Kuttipadam Road,<br>Vengola, Ernakulam, Kerala – 683556</span></div>
+          <div><span class="c-label">Registered Address</span><span class="c-val">8/957-D<br>Kerala – 683556, India</span></div>
         </div>
       </div>
     </div>
@@ -752,7 +862,7 @@ function initCarousel(id) {
 }
 
 // Init all carousels
-['fv','cv','wl','pw','rs'].forEach(initCarousel);
+['fva','fv','cv','wl','pw','rs'].forEach(initCarousel);
 
 // Arrow buttons
 document.querySelectorAll('.car-btn').forEach(btn => {
